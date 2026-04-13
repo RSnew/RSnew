@@ -1,0 +1,82 @@
+name: Update README Activity
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches: [main]
+
+jobs:
+  update-activity:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update recent activity
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch recent events
+          ACTIVITY=$(gh api users/RSnew/events --jq '
+            [.[] | select(.type == "PushEvent" or .type == "CreateEvent" or .type == "PullRequestEvent" or .type == "IssuesEvent") |
+            {
+              type: .type,
+              repo: .repo.name,
+              date: (.created_at | split("T")[0]),
+              detail: (
+                if .type == "PushEvent" then
+                  "pushed \(.payload.commits | length) commit(s)"
+                elif .type == "CreateEvent" then
+                  "created \(.payload.ref_type) \(.payload.ref // "")"
+                elif .type == "PullRequestEvent" then
+                  "\(.payload.action) PR #\(.payload.pull_request.number)"
+                elif .type == "IssuesEvent" then
+                  "\(.payload.action) issue #\(.payload.issue.number)"
+                else
+                  .type
+                end
+              )
+            }] | .[0:8] | .[] | "- **\(.date)** [\(.repo | split("/")[1])](https://github.com/\(.repo)): \(.detail)"
+          ')
+
+          # Also get system stats from the self-hosted runner
+          UPTIME=$(uptime | sed 's/.*up /up /' | sed 's/,.*//')
+          LOAD=$(sysctl -n vm.loadavg 2>/dev/null | awk '{print $2}' || echo "?")
+          DISK=$(df -h / | tail -1 | awk '{print $4 " free"}')
+
+          # Build the activity section
+          cat > /tmp/activity_section.md << SECTION
+          <!-- ACTIVITY_START -->
+          $ACTIVITY
+
+          <sub>🖥️ Self-hosted runner: $UPTIME | Load: $LOAD | Disk: $DISK | Updated: $(date -u '+%Y-%m-%d %H:%M UTC')</sub>
+          <!-- ACTIVITY_END -->
+          SECTION
+
+          # Replace the activity section in README
+          python3 << 'PYEOF'
+          import re
+          with open("README.md", "r") as f:
+              content = f.read()
+          with open("/tmp/activity_section.md", "r") as f:
+              new_section = f.read().strip()
+          content = re.sub(
+              r"<!-- ACTIVITY_START -->.*?<!-- ACTIVITY_END -->",
+              new_section,
+              content,
+              flags=re.DOTALL
+          )
+          with open("README.md", "w") as f:
+              f.write(content)
+          PYEOF
+
+          echo "Activity section updated"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --cached --quiet || (git commit -m "chore: update activity [skip ci]" && git push)
