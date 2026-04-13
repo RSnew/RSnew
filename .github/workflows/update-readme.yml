@@ -74,6 +74,46 @@ jobs:
 
           echo "Activity section updated"
 
+      - name: Generate machine status JSON for dashboard
+        run: |
+          UPTIME=$(uptime | sed 's/.*up //' | sed 's/,.*//')
+          LOAD=$(sysctl -n vm.loadavg 2>/dev/null | awk '{print $2}' || echo "?")
+          DISK=$(df -h / | tail -1 | awk '{print $4}')
+          CPU=$(ps -A -o %cpu | awk '{s+=$1} END {printf "%.0f", s}')
+          MEM=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%.0f", $1/1024/1024/1024}')
+
+          # Check services
+          PROCS=$(ps aux)
+          svc_qqbot=$(echo "$PROCS" | grep -c "nonebot\|xiaoer-qq-bot/main.py" || true)
+          svc_napcat=$(echo "$PROCS" | grep -c "qemu.*napcat\|Napcat" || true)
+          svc_runner=$(echo "$PROCS" | grep -c "Runner.Listener" || true)
+          svc_danmaku=$(echo "$PROCS" | grep -c "danmaku\|9877" || true)
+          svc_promptcraft=$(echo "$PROCS" | grep -c "promptcraft\|8088" || true)
+
+          cat > /tmp/machine-status.json << STATUSEOF
+          {
+            "uptime": "$UPTIME",
+            "load": "$LOAD",
+            "memory_gb": $MEM,
+            "disk_free": "$DISK",
+            "cpu_pct": "$CPU",
+            "services": {
+              "QQ Bot": "$([ $svc_qqbot -gt 0 ] && echo online || echo offline)",
+              "NapCat": "$([ $svc_napcat -gt 0 ] && echo online || echo offline)",
+              "GitHub Runner": "$([ $svc_runner -gt 0 ] && echo online || echo offline)",
+              "Danmaku": "$([ $svc_danmaku -gt 0 ] && echo online || echo offline)",
+              "PromptCraft": "$([ $svc_promptcraft -gt 0 ] && echo online || echo offline)"
+            },
+            "updated": "$(date -u '+%Y-%m-%d %H:%M UTC')"
+          }
+          STATUSEOF
+
+          # Push to github.io repo
+          cd /Volumes/Mac/Code/RSnew.github.io
+          cp /tmp/machine-status.json status.json
+          git add status.json
+          git diff --cached --quiet || (git commit -m "chore: update machine status [skip ci]" && git push)
+
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
