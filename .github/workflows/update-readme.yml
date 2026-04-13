@@ -114,6 +114,27 @@ jobs:
           git add status.json
           git diff --cached --quiet || (git commit -m "chore: update machine status [skip ci]" && git push)
 
+      - name: Generate data.json for dashboard
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch activity
+          ACTIVITY=$(gh api users/RSnew/events --jq '[.[] | select(.type == "PushEvent" or .type == "CreateEvent" or .type == "PullRequestEvent") | {type: .type, repo: .repo.name, date: (.created_at | split("T")[0]), detail: (if .type == "PushEvent" then "推送了 \(.payload.commits | length) 个提交" elif .type == "CreateEvent" then "创建了 \(.payload.ref_type) \(.payload.ref // "")" elif .type == "PullRequestEvent" then "\(.payload.action) PR #\(.payload.pull_request.number)" else .type end)}] | .[0:8]')
+
+          # Fetch repos
+          REPOS=$(gh api 'users/RSnew/repos?sort=updated&per_page=8' --jq '[.[] | {name: .name, url: .html_url, language: .language}]')
+
+          UPDATED=$(date -u '+%Y-%m-%d %H:%M UTC')
+
+          # Build data.json
+          echo "{\"activity\":${ACTIVITY},\"repos\":${REPOS},\"updated\":\"${UPDATED}\"}" | python3 -m json.tool > /tmp/data.json
+
+          # Push to github.io repo
+          cd /Volumes/Mac/Code/RSnew.github.io
+          cp /tmp/data.json data.json
+          git add data.json
+          git diff --cached --quiet || (git commit -m "chore: update dashboard data [skip ci]" && git push)
+
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
