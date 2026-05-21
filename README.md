@@ -49,16 +49,16 @@ Platforms    macOS · iOS · Linux
 ### Recent Activity
 
 <!-- ACTIVITY_START -->
-- **2026-04-17** [RSnew.github.io](https://github.com/RSnew/RSnew.github.io): pushed 0 commit(s)
-- **2026-04-17** [RSnew.github.io](https://github.com/RSnew/RSnew.github.io): pushed 0 commit(s)
-- **2026-04-17** [RSnew.github.io](https://github.com/RSnew/RSnew.github.io): pushed 0 commit(s)
-- **2026-04-17** [RSnew.github.io](https://github.com/RSnew/RSnew.github.io): pushed 0 commit(s)
-- **2026-04-17** [RSnew.github.io](https://github.com/RSnew/RSnew.github.io): pushed 0 commit(s)
-- **2026-04-17** [RSnew.github.io](https://github.com/RSnew/RSnew.github.io): pushed 0 commit(s)
-- **2026-04-17** [RSnew.github.io](https://github.com/RSnew/RSnew.github.io): pushed 0 commit(s)
-- **2026-04-17** [RSnew.github.io](https://github.com/RSnew/RSnew.github.io): pushed 0 commit(s)
+- **2026-05-21** [RSnew](https://github.com/RSnew/RSnew): pushed 0 commit(s)
+- **2026-05-21** [RSnew](https://github.com/RSnew/RSnew): created branch claude/redesign-homepage-intro-CHprN
+- **2026-05-07** [xiaoer-duel](https://github.com/RSnew/xiaoer-duel): pushed 0 commit(s)
+- **2026-05-04** [xiaoer-duel](https://github.com/RSnew/xiaoer-duel): pushed 0 commit(s)
+- **2026-05-04** [xiaoer-duel](https://github.com/RSnew/xiaoer-duel): pushed 0 commit(s)
+- **2026-05-04** [xiaoer-duel](https://github.com/RSnew/xiaoer-duel): pushed 0 commit(s)
+- **2026-05-03** [xiaoer-duel](https://github.com/RSnew/xiaoer-duel): pushed 0 commit(s)
+- **2026-05-03** [xiaoer-duel](https://github.com/RSnew/xiaoer-duel): pushed 0 commit(s)
 
-<sub>🖥️ Self-hosted runner: up 28 days | Load:  | Disk: 3.3Gi free | Updated: 2026-04-18 01:20 UTC</sub>
+<sub>🖥️ Self-hosted runner: up 3 days | Load:  | Disk: 12Gi free | Updated: 2026-05-21 07:56 UTC</sub>
 <!-- ACTIVITY_END -->
 
 ---
